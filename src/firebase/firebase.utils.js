@@ -10,7 +10,7 @@ const config = {
   storageBucket: 'crownclothingshop.appspot.com',
   messagingSenderId: '670563453063',
   appId: '1:670563453063:web:158a67e03fefee89c51022',
-  measurementId: 'G-6GYDR02LL8'
+  measurementId: 'G-6GYDR02LL8',
 };
 
 firebase.initializeApp(config);
@@ -27,13 +27,40 @@ export const createUserProfileDocument = async (userAuth, additionalData) => {
         displayName,
         email,
         createdAt,
-        ...additionalData
+        ...additionalData,
       });
     } catch (err) {
       console.log('error creating user.', err.message);
     }
   }
   return userRef;
+};
+
+export const addCollectionAndDocuments = async (
+  collectionKey,
+  objectsToAdd
+) => {
+  const collectionRef = firestore.collection(collectionKey);
+  console.log(collectionRef);
+  const batch = firestore.batch();
+  objectsToAdd.forEach((element) => {
+    const newDocRef = collectionRef.doc();
+    batch.set(newDocRef, element);
+  });
+  return await batch.commit();
+};
+
+export const convertCollectionSnapshotToMap = (collections) => {
+  const transformedCollection = collections.map((doc) => {
+    const { title, items } = doc.data();
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title,
+      items,
+    };
+  });
+  console.log(transformedCollection);
 };
 
 export const auth = firebase.auth();
